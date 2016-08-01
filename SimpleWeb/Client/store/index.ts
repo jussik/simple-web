@@ -11,12 +11,9 @@ export const store = createStore(
     applyMiddleware(thunk));
 
 function fetchProducts(dispatch: Dispatch<IStoreState>) {
-
-console.time("fetch");
     return fetch("/api/products")
         .then(d => d.json())
         .then(prods => dispatch(loadProducts(prods)))
-        .then(p => (console.timeEnd("fetch"),p))
 }
 
 store.dispatch(fetchProducts);
