@@ -4,6 +4,9 @@ export interface IResource {
     id?: string;
 }
 
+const jsonHeaders = new Headers({
+    "Content-Type": "application/json"
+});
 export class Api<T extends IResource> {
     path: string;
 
@@ -21,13 +24,15 @@ export class Api<T extends IResource> {
     add(val: T): Promise<T> {
         return fetch(this.path, {
             method: "POST",
-            body: JSON.stringify(val)
+            body: JSON.stringify(val),
+            headers: jsonHeaders
         }).then(d => d.json());
     }
     update(val: T): Promise<T> {
         return fetch(this.path + "/" + val.id, {
             method: "PUT",
-            body: JSON.stringify(val)
+            body: JSON.stringify(val),
+            headers: jsonHeaders
         }).then(d => d.json());
     }
     remove(val: T): Promise<void> {

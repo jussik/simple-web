@@ -7,5 +7,5 @@ import {store} from "../store";
 import ProductList from "./productList";
 
 ReactDOM.render(<Provider store={store}>
-    <ProductList></ProductList>
+    <ProductList/>
 </Provider>, document.getElementById("main"));
