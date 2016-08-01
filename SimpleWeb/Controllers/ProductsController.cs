@@ -17,14 +17,12 @@ namespace SimpleWeb.Controllers
             this.db = db;
         }
 
-        // GET api/values
         [HttpGet]
         public async Task<IEnumerable<Product>> Get()
         {
             return await db.Products.AsNoTracking().ToListAsync();
         }
 
-        // GET api/values/5
         [HttpGet("{id}")]
         public async Task<Product> Get(Guid id)
         {
@@ -32,7 +30,6 @@ namespace SimpleWeb.Controllers
                 .SingleOrDefaultAsync(p => p.Id == id);
         }
 
-        // POST api/values
         [HttpPost]
         public async Task<Product> Post([FromBody] Product product)
         {
@@ -41,7 +38,6 @@ namespace SimpleWeb.Controllers
             return product;
         }
 
-        // PUT api/values/5
         [HttpPut("{id}")]
         public async Task<Product> Put(Guid id, [FromBody] Product product)
         {
@@ -52,7 +48,6 @@ namespace SimpleWeb.Controllers
             return product;
         }
 
-        // DELETE api/values/5
         [HttpDelete("{id}")]
         public async Task<NoContentResult> Delete(Guid id)
         {

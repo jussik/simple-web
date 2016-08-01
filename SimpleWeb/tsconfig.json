@@ -1,0 +1,12 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "jsx": "react",
+    "target": "es5",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "experimentalDecorators": true
+  },
+  "files": ["Client/index.ts"]
+}
