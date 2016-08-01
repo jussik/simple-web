@@ -6,16 +6,15 @@ import {addProduct} from "../store/products";
 import {IProduct, Products} from "../api/products";
 
 import Product from "./product";
+import {ActionProp} from "./common";
 
-type ActionProp<T> = (payload: T) => ReduxActions.Action<T>;
-
-interface IProductListProps {
+interface IStateProps {
     products: IProduct[];
 }
-interface IProductListDispatchProps {
+interface IDispatchProps {
     onAdd: ActionProp<IProduct>;
 }
-class ProductList extends React.Component<IProductListProps & IProductListDispatchProps, {}> {
+class ProductList extends React.Component<IStateProps & IDispatchProps, {}> {
     createProduct() {
         const name = (this.refs["productName"] as HTMLInputElement).value;
         this.props.onAdd({ name });
@@ -34,10 +33,10 @@ class ProductList extends React.Component<IProductListProps & IProductListDispat
     }
 }
 
-const mapState = (state: IStoreState) => ({
+const stateMap = (state: IStoreState) => ({
     products: state.products
 });
-const mapDispatch = (dispatch: Redux.Dispatch<any>) => ({
+const dispatchMap = (dispatch: Redux.Dispatch<any>) => ({
     onAdd: (p: IProduct): any => Products.add(p).then(p => dispatch(addProduct(p)))
 });
-export default connect<IProductListProps, IProductListDispatchProps, {}>(mapState, mapDispatch)(ProductList);
+export default connect<IStateProps, IDispatchProps, {}>(stateMap, dispatchMap)(ProductList);

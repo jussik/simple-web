@@ -5,15 +5,15 @@ import {connect} from "react-redux";
 import {removeProduct} from "../store/products";
 import {IProduct, Products} from "../api/products";
 
-type ActionProp<T> = (payload: T) => ReduxActions.Action<T>;
+import {ActionProp} from "./common";
 
-interface IProductProps {
+interface IProps {
     product: IProduct;
 }
-interface IProductDispatchProps {
+interface IDispatchProps {
     onRemove: ActionProp<IProduct>;
 }
-class Product extends React.Component<IProductProps & IProductDispatchProps, {}> {
+class Product extends React.Component<IProps & IDispatchProps, {}> {
     render() {
         const onRemove = this.props.onRemove.bind(this, this.props.product);
         return <div>
@@ -23,8 +23,8 @@ class Product extends React.Component<IProductProps & IProductDispatchProps, {}>
     }
 }
 
-const mapDispatch = (dispatch: Dispatch<any>) => ({
+const dispatchMap = (dispatch: Dispatch<any>) => ({
     onRemove: (p: IProduct): any =>
         Products.remove(p).then(() => dispatch(removeProduct(p)))
 });
-export default connect<{}, IProductDispatchProps, IProductProps>(null, mapDispatch)(Product);
+export default connect<{}, IDispatchProps, IProps>(null, dispatchMap)(Product);

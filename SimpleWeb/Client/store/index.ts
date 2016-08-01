@@ -2,8 +2,9 @@ import {createStore, combineReducers, applyMiddleware, Dispatch} from "redux";
 import thunk from "redux-thunk";
 import "whatwg-fetch";
 
-import {reducer as products, loadProducts, IProductsState} from "./products";
 import {Products} from "../api/products";
+
+import {reducer as products, loadProducts, IProductsState} from "./products";
 
 export type IStoreState = { products: IProductsState };
 
