@@ -2,7 +2,7 @@ import * as React from "react";
 import {connect} from "react-redux";
 
 import {IStoreState} from "../store";
-import {IProduct} from "../store/products";
+import {IProduct} from "../api/products";
 
 import Product from "./product";
 

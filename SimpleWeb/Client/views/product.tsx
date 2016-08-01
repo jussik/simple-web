@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import {IProduct} from "../store/products";
+import {IProduct} from "../api/products";
 
 interface IProductProps {
     product: IProduct;
