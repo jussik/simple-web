@@ -33,12 +33,11 @@ namespace SimpleWeb.Services
             try
             {
                 sockets.Add(id, socket);
-                var token = CancellationToken.None;
 
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 var buffer = new ArraySegment<byte>(new byte[0x4000]); // 16k
                 while(socket.State == WebSocketState.Open) {
-                    var message = await socket.ReceiveAsync(buffer, token);
+                    var message = await socket.ReceiveAsync(buffer, default(CancellationToken));
                     if(message.MessageType == WebSocketMessageType.Text) {
                         var payload = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, message.Count);
                         sb.Append(payload);
