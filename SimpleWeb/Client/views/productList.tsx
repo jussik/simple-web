@@ -16,8 +16,12 @@ interface IDispatchProps {
 }
 class ProductList extends React.Component<IStateProps & IDispatchProps, {}> {
     createProduct() {
-        const name = (this.refs["productName"] as HTMLInputElement).value;
-        this.props.onAdd({ name });
+        const input = this.refs["productName"] as HTMLInputElement;
+        const name = input.value;
+        input.value = "";
+        if(name !== "") {
+            this.props.onAdd({ name });
+        }
     }
     render() {
         const createProduct = this.createProduct.bind(this);

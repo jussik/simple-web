@@ -6,9 +6,6 @@ export interface IResource {
     id?: string;
 }
 
-const jsonHeaders = new Headers({
-    "Content-Type": "application/json"
-});
 export class Api<T extends IResource> {
     path: string;
 
@@ -16,11 +13,14 @@ export class Api<T extends IResource> {
         this.path = "/api/" + name;
     }
     private send(method: string, val: T, id?: string): Promise<Response> {
-        return publisher.loaded.then(() =>
+        return publisher.loaded.then(pub =>
             fetch(this.path + (id ? "/" + id : ""), {
                 method: method,
                 body: val && JSON.stringify(val),
-                headers: val && jsonHeaders,
+                headers: new Headers({
+                    "Content-Type": "application/json; charset=utf-8",
+                    "X-Publisher-Client": pub.id 
+                }),
                 credentials: "same-origin"
             }));
     }

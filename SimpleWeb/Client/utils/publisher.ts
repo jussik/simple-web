@@ -2,29 +2,44 @@ import {Action} from "redux-actions";
 import {store} from "../store";
 
 interface PublisherStatus {
-    success: boolean;
-    error: string;
+    open: boolean;
+    id?: string;
 }
 
 class Publisher {
-    isOpen: boolean;
     socket: WebSocket;
-    loaded: Promise<{}>;
+    status: PublisherStatus;
+    loaded: Promise<PublisherStatus>;
     constructor() {
-        this.isOpen = false;
+        this.status = { open: false };
         this.loaded = new Promise((resolve, reject) => {
             this.socket = new WebSocket("ws://localhost:5000");
-            this.socket.onopen = () => resolve();
-            this.socket.onerror = () => reject("Unable to connect to socket");
-            this.socket.onmessage = d => this.handleMessage(JSON.parse(d.data));
-        })
+            this.socket.onopen = () => {
+                resolve(this.status);
+                this.socket.onmessage = d => {
+                    this.socket.onerror = null;
+                    const data = JSON.parse(d.data);
+                    this.status.id = data.id;
+                    resolve(this.status);
+                    this.socket.onmessage = d => this.handleMessage(JSON.parse(d.data));
+                }
+                this.socket.onclose = () => this.status.open = false;
+            }
+            this.socket.onerror = () => {
+                reject(this.status);
+                this.socket.onopen = null;
+            }
+        });
     }
     private handleMessage(data: any) {
-        console.log("GOT", data);
         store.dispatch(data);
     }
     publish(action: Action<any>) {
-        this.loaded.then(() => this.socket.send(JSON.stringify(action)));
+        this.loaded.then(status => {
+            if(!status.open)
+                throw new Error("Publisher not connected");
+            this.socket.send(JSON.stringify(action))
+        });
     }
 }
 

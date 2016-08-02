@@ -38,7 +38,7 @@ namespace SimpleWeb.Controllers
         {
             db.Products.Add(product);
             await db.SaveChangesAsync();
-            await publisher.PublishAsync(new { product });
+            await publisher.PublishAsync(new { type = "products/ADD", payload = product });
             return product;
         }
 
@@ -59,6 +59,7 @@ namespace SimpleWeb.Controllers
             db.Products.Attach(prod);
             db.Products.Remove(prod);
             await db.SaveChangesAsync();
+            await publisher.PublishAsync(new { type = "products/REMOVE", payload = new {id} });
             return NoContent();
         }
     }

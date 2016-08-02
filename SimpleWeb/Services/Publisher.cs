@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace SimpleWeb.Services
 {
@@ -21,55 +22,53 @@ namespace SimpleWeb.Services
             sockets = new ConcurrentDictionary<string, WebSocket>();
         }
 
-        private const string ClientIdKey = "PublisherClientId";
-        public string GetClientId() {
-            var context = this.context.HttpContext;
-            string id = context.Request.Cookies[ClientIdKey];
-            if(id == null) {
-                id = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-                context.Response.Cookies.Append(ClientIdKey, id, new CookieOptions {
-                    Path = "/",
-                    HttpOnly = false
-                });
-            }
-            return id;
-        }
-
         public async Task Connect(HttpContext context)
         {
-            string id = GetClientId();
+            string id = Convert.ToBase64String(Guid.NewGuid().ToByteArray()).TrimEnd('=');
             var socket = await context.WebSockets.AcceptWebSocketAsync();
-            sockets.Add(id, socket);
-            var token = CancellationToken.None;
 
-            StringBuilder sb = new StringBuilder();
-            var buffer = new ArraySegment<byte>(new byte[0x4000]); // 16k
-            while(socket.State == WebSocketState.Open) {
-                var message = await socket.ReceiveAsync(buffer, token);
-                if(message.MessageType == WebSocketMessageType.Text) {
-                    var payload = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, message.Count);
-                    sb.Append(payload);
-                    if(message.EndOfMessage) {
-                        await PublishRawAsync(sb.ToString(), id);
-                        sb.Clear();
+            var initMsg = GetMessage(new { id });
+            await socket.SendAsync(initMsg, WebSocketMessageType.Text, true, default(CancellationToken));
+
+            try
+            {
+                sockets.Add(id, socket);
+                var token = CancellationToken.None;
+
+                StringBuilder sb = new StringBuilder();
+                var buffer = new ArraySegment<byte>(new byte[0x4000]); // 16k
+                while(socket.State == WebSocketState.Open) {
+                    var message = await socket.ReceiveAsync(buffer, token);
+                    if(message.MessageType == WebSocketMessageType.Text) {
+                        var payload = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, message.Count);
+                        sb.Append(payload);
+                        if(message.EndOfMessage) {
+                            await PublishAsync(new { type="message", payload=sb.ToString()}, id);
+                            sb.Clear();
+                        }
                     }
                 }
+            } finally {
+                sockets.Remove(id);
             }
-
-            sockets.Remove(id);
         }
 
         public async Task PublishAsync<T>(T data) {
-            await PublishRawAsync(JsonConvert.SerializeObject(data), GetClientId());
+            string id = (string)context.HttpContext.Request.Headers["X-Publisher-Client"];
+            await PublishAsync(data, id);
         }
-
-        private async Task PublishRawAsync(string message, string exceptId) {
-            var token = CancellationToken.None;
-            var buffer = new ArraySegment<Byte>(Encoding.UTF8.GetBytes(message));
+        private async Task PublishAsync<T>(T data, string exceptId) {
+            var buffer = GetMessage(data);
             await Task.WhenAll(sockets.ToList()
                 .Where(p => p.Key != exceptId && p.Value.State == WebSocketState.Open)
-                .Select(p => p.Value.SendAsync(buffer, WebSocketMessageType.Text, true, token))
+                .Select(p => p.Value.SendAsync(buffer, WebSocketMessageType.Text, true, default(CancellationToken)))
                 .ToArray());
+        }
+        private ArraySegment<byte> GetMessage<T>(T data) {
+            string json = JsonConvert.SerializeObject(data, Formatting.None, new JsonSerializerSettings {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
+            return new ArraySegment<byte>(Encoding.UTF8.GetBytes(json));
         }
     }
 }
