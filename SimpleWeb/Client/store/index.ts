@@ -1,6 +1,5 @@
 import {createStore, combineReducers, applyMiddleware, Dispatch} from "redux";
 import thunk from "redux-thunk";
-import "whatwg-fetch";
 
 import {Products} from "../api/products";
 

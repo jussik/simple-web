@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SimpleWeb.Models;
+using SimpleWeb.Services;
 
 namespace SimpleWeb.Controllers
 {
@@ -11,10 +12,12 @@ namespace SimpleWeb.Controllers
     public class ProductsController : Controller
     {
         private readonly Db db;
+        private readonly Publisher publisher;
 
-        public ProductsController(Db db)
+        public ProductsController(Db db, Publisher publisher)
         {
             this.db = db;
+            this.publisher = publisher;
         }
 
         [HttpGet]
@@ -35,6 +38,7 @@ namespace SimpleWeb.Controllers
         {
             db.Products.Add(product);
             await db.SaveChangesAsync();
+            await publisher.PublishAsync(new { product });
             return product;
         }
 
