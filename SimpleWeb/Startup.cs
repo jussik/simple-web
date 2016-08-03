@@ -1,6 +1,6 @@
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,25 +25,21 @@ namespace SimpleWeb
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<Db>(opts => opts.UseNpgsql("Host=localhost;Database=SimpleWeb"));
+            services.AddDbContext<Db>(
+                opts => opts.UseNpgsql("Host=localhost;Database=SimpleWeb"),
+                ServiceLifetime.Transient);
+
+            services.AddPublisher(p => p.AddConsumers(typeof(Publisher).GetTypeInfo().Assembly));
 
             services.AddMvc();
-
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<Publisher>();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, Publisher publisher)
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            app.UseWebSockets();
-            app.Use(async (ctx, next) => {
-                if(ctx.WebSockets.IsWebSocketRequest) {
-                    await publisher.Connect(ctx);
-                } else await next();
-            });
+            app.UsePublisher();
 
             app.UseDefaultFiles();
             app.UseStaticFiles();

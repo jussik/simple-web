@@ -4,6 +4,7 @@ import {connect} from "react-redux";
 
 import {removeProduct} from "../store/products";
 import {IProduct, Products} from "../api/products";
+import publisher from "../utils/publisher";
 
 import {ActionProp} from "./common";
 
@@ -25,6 +26,8 @@ class Product extends React.Component<IProps & IDispatchProps, {}> {
 
 const dispatchMap = (dispatch: Dispatch<any>) => ({
     onRemove: (p: IProduct): any =>
-        Products.remove(p).then(() => dispatch(removeProduct(p)))
+        publisher.publish(removeProduct(p))
+    //onRemove: (p: IProduct): any =>
+        //Products.remove(p).then(() => dispatch(removeProduct(p)))
 });
 export default connect<{}, IDispatchProps, IProps>(null, dispatchMap)(Product);

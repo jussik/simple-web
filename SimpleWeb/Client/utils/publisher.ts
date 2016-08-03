@@ -15,10 +15,10 @@ class Publisher {
         this.loaded = new Promise((resolve, reject) => {
             this.socket = new WebSocket("ws://localhost:5000");
             this.socket.onopen = () => {
-                resolve(this.status);
                 this.socket.onmessage = d => {
                     this.socket.onerror = null;
                     const data = JSON.parse(d.data);
+                    this.status.open = true;
                     this.status.id = data.id;
                     resolve(this.status);
                     this.socket.onmessage = d => this.handleMessage(JSON.parse(d.data));

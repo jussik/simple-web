@@ -4,6 +4,7 @@ import {connect} from "react-redux";
 import {IStoreState} from "../store";
 import {addProduct} from "../store/products";
 import {IProduct, Products} from "../api/products";
+import publisher from "../utils/publisher";
 
 import Product from "./product";
 import {ActionProp} from "./common";
@@ -41,6 +42,7 @@ const stateMap = (state: IStoreState) => ({
     products: state.products
 });
 const dispatchMap = (dispatch: Redux.Dispatch<any>) => ({
-    onAdd: (p: IProduct): any => Products.add(p).then(p => dispatch(addProduct(p)))
+    onAdd: (p: IProduct): any => publisher.publish(addProduct(p))
+    //onAdd: (p: IProduct): any => Products.add(p).then(p => dispatch(addProduct(p)))
 });
 export default connect<IStateProps, IDispatchProps, {}>(stateMap, dispatchMap)(ProductList);

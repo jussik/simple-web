@@ -8,7 +8,7 @@ using SimpleWeb.Services;
 
 namespace SimpleWeb.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]"), PubConsumer("products")]
     public class ProductsController : Controller
     {
         private readonly Db db;
@@ -33,12 +33,28 @@ namespace SimpleWeb.Controllers
                 .SingleOrDefaultAsync(p => p.Id == id);
         }
 
+        [PubConsumer("ADD")]
+        public async Task<Product> Add(Product product)
+        {
+            db.Products.Add(product);
+            await db.SaveChangesAsync();
+            return product;
+        }
+
+        [PubConsumer("REMOVE")]
+        public async Task<Product> Remove(Product product)
+        {
+            db.Products.Attach(product);
+            db.Products.Remove(product);
+            await db.SaveChangesAsync();
+            return new Product{Id=product.Id};
+        }
+
         [HttpPost]
         public async Task<Product> Post([FromBody] Product product)
         {
             db.Products.Add(product);
             await db.SaveChangesAsync();
-            await publisher.PublishAsync(new { type = "products/ADD", payload = product });
             return product;
         }
 
@@ -59,7 +75,6 @@ namespace SimpleWeb.Controllers
             db.Products.Attach(prod);
             db.Products.Remove(prod);
             await db.SaveChangesAsync();
-            await publisher.PublishAsync(new { type = "products/REMOVE", payload = new {id} });
             return NoContent();
         }
     }

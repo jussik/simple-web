@@ -8,7 +8,9 @@ export const ADD = "products/ADD";
 export const LOAD = "products/LOAD";
 export const REMOVE = "products/REMOVE";
 
-export const addProduct = createAction<IProduct>(ADD);
+export const addProduct = createAction<IProduct>(ADD, p => {
+    return p;
+});
 export const loadProducts = createAction<IProduct[]>(LOAD);
 export const removeProduct = createAction<IProduct>(REMOVE);
 
