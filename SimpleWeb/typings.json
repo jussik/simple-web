@@ -9,6 +9,7 @@
     "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20160728142841"
   },
   "dependencies": {
+    "es6-promise": "registry:npm/es6-promise#3.0.0+20160723033700",
     "react-dom": "registry:npm/react-dom#15.0.1+20160705210405"
   }
 }
